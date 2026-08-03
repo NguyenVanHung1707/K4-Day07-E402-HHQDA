@@ -1,8 +1,8 @@
 # Báo Cáo Nhóm — Lab 7: Embedding & Vector Store
 
-**Nhóm:** [Tên nhóm]
-**Thành viên:** [Họ tên từng thành viên]
-**Ngày:** [Ngày nộp]
+**Nhóm:** K4-Day07-E402-HHQDA
+**Thành viên 3:** Nguyễn Văn Hưng (2A202601284)
+**Ngày:** 03/08/2026
 
 > **Nộp 1 bản / nhóm.** Phần cá nhân (hướng tiếp cận, kết quả riêng, dự đoán…) mỗi thành viên nộp riêng trong `REPORT_CANHAN.md`. Chi tiết thang điểm: `docs/SCORING.md`.
 
@@ -156,7 +156,7 @@ class SentenceWithOverlapChunker:
 |-----------|----------|----------------------|-----------|----------|
 | Thành viên 1 | `FixedSizeChunker` (overlap 50) | 8.0/10 | Đồng đều kích thước vector, chạy rất nhanh. | Dễ bị ngắt đôi câu văn ở ranh giới chunk. |
 | Thành viên 2 | `RecursiveChunker` | 9.0/10 | Giữ trọn vẹn ranh giới đoạn văn và các danh sách. | Kích thước chunk không đều giữa các đoạn ngắn/dài. |
-| Thành viên 3 | `HeadingBasedChunker` | 10.0/10 | Gom trọn vẹn 1 quy định/bước vào 1 chunk, ngữ cảnh hoàn hảo. | Chunk có thể khá lớn nếu một mục chứa quá nhiều chữ. |
+| Thành viên 3 (Nguyễn Văn Hưng - 2A202601284) | Custom `HeadingBasedChunker` | 10.0/10 | Gom trọn vẹn 1 quy định/bước vào 1 chunk, ngữ cảnh hoàn hảo. | Chunk có thể khá lớn nếu một mục chứa quá nhiều chữ. |
 | Thành viên 4 | `FAQPairChunker` | 9.5/10 | Cực kỳ xuất sắc cho các truy vấn dạng FAQ / Hỏi-Đáp. | Phụ thuộc vào tài liệu có định dạng Q&A. |
 | Thành viên 5 | `SentenceWithOverlapChunker` | 8.5/10 | Không bị hỏng ranh giới câu, gối đầu câu giữ mạch ngữ cảnh. | Số lượng chunk sinh ra nhiều hơn làm tăng dung lượng store. |
 
