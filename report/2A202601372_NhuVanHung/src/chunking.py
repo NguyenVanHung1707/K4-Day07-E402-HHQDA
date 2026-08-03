@@ -69,6 +69,29 @@ class SentenceChunker:
         return chunks
 
 
+class SentenceWithOverlapChunker:
+    """Tách nhóm 3 câu với cơ chế trượt (overlap) 1 câu giữa các chunk liền kề."""
+
+    def __init__(self, max_sentences: int = 3, overlap: int = 1) -> None:
+        self.max_sentences = max_sentences
+        self.step = max(1, max_sentences - overlap)
+
+    def chunk(self, text: str) -> list[str]:
+        if not text or not text.strip():
+            return []
+        sentences = [s.strip() for s in re.split(r'(?<=[.!?])\s+|\n+', text) if s.strip()]
+        chunks = []
+        for i in range(0, len(sentences), self.step):
+            group = sentences[i : i + self.max_sentences]
+            c_str = " ".join(group).strip()
+            if c_str:
+                chunks.append(c_str)
+            if i + self.max_sentences >= len(sentences):
+                break
+        return chunks
+
+
+
 class RecursiveChunker:
     """
     Recursively split text using separators in priority order.

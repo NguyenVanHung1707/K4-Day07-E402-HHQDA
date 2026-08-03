@@ -4,6 +4,7 @@ from .chunking import (
     FixedSizeChunker,
     RecursiveChunker,
     SentenceChunker,
+    SentenceWithOverlapChunker,
     compute_similarity,
 )
 from .embeddings import (
@@ -22,6 +23,7 @@ __all__ = [
     "Document",
     "FixedSizeChunker",
     "SentenceChunker",
+    "SentenceWithOverlapChunker",
     "RecursiveChunker",
     "ChunkingStrategyComparator",
     "compute_similarity",
