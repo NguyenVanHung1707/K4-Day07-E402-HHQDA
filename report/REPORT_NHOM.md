@@ -85,7 +85,7 @@ chunker = RecursiveChunker(separators=["\n\n", "\n", ". ", " "], chunk_size=350)
 chunks = chunker.chunk(text)
 ```
 
-**Thành viên 3 — [Tên Thành Viên 3]**
+**Thành viên 3 — Nguyễn Văn Hưng (2A202601284)**
 - **Loại chiến lược:** Custom `HeadingBasedChunker` (Tách theo tiêu đề Markdown `#`, `##`, `###`)
 - **Mô tả & lý do chọn:** Các bài viết hỗ trợ Shopee đều phân chia theo tiêu đề mục lớn (`#`, `## 1.`, `## 2.`). Tách theo Heading giúp gom trọn vẹn toàn bộ một quy định/bước thực hiện vào đúng 1 chunk duy nhất, tối ưu ngữ cảnh cho RAG.
 - **Code snippet:**

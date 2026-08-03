@@ -181,3 +181,18 @@ class ChunkingStrategyComparator:
             }
         return results
 
+
+class HeadingBasedChunker:
+    """Custom Chunker cho Thành viên 3: Tách văn bản Markdown dựa theo tiêu đề Heading (#, ##, ###)."""
+
+    def __init__(self, min_length: int = 50) -> None:
+        self.min_length = min_length
+
+    def chunk(self, text: str) -> list[str]:
+        if not text or not text.strip():
+            return []
+        sections = re.split(r'(?m)^(?:#{1,4})\s+', text)
+        chunks = [s.strip() for s in sections if len(s.strip()) >= self.min_length]
+        return chunks if chunks else [text.strip()]
+
+

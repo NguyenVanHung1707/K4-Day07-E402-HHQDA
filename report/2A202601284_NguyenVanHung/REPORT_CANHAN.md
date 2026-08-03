@@ -54,11 +54,12 @@ Giải thích cách tiếp cận khi lập trình các phần chính trong gói 
 
 ### Các hàm chia nhỏ (Chunking Functions)
 
-**`SentenceChunker.chunk`** — hướng tiếp cận:
-> Sử dụng biểu thức chính quy `re.split(r'(?<=[.!?])\s+|\n+', text)` để tách văn bản dựa theo các dấu câu kết thúc câu (`.`, `!`, `?`) hoặc ký tự xuống dòng. Các câu sau khi tách được làm sạch khoảng trắng và gom thành các chunk với số lượng câu tối đa `max_sentences_per_chunk`. Xử lý trường hợp ngoại lệ văn bản rỗng hoặc không có dấu câu bằng cách trả về danh sách phù hợp.
+**`SentenceChunker.chunk` & `HeadingBasedChunker.chunk` (Custom Chunker của Thành viên 3)** — hướng tiếp cận:
+> Là Thành viên 3, tôi triển khai custom chiến lược **`HeadingBasedChunker`** sử dụng biểu thức chính quy `re.split(r'(?m)^(?:#{1,4})\s+', text)` để tách văn bản Markdown dựa theo các dòng tiêu đề `#`, `##`, `###`. Kỹ thuật này giữ nguyên vẹn toàn bộ một mục hướng dẫn/quy định vào cùng 1 chunk, tránh cắt vụn câu văn. Bên cạnh đó, `SentenceChunker` tách câu dựa theo regex `re.split(r'(?<=[.!?])\s+|\n+', text)` và gom nhóm theo số lượng câu tối đa.
 
 **`RecursiveChunker.chunk` / `_split`** — hướng tiếp cận:
-> Áp dụng thuật toán đệ quy thử nghiệm danh sách phân cách theo ưu tiên `["\n\n", "\n", ". ", " ", ""]`. Trường hợp cơ sở (base case) là khi đoạn văn bản có độ dài $\le \text{chunk\_size}$ hoặc không còn dấu phân cách nào. Thuật toán tách văn bản theo phân cách hiện tại, nếu mảnh nào vẫn vượt quá `chunk\_size` thì gọi đệ quy `_split` với danh sách phân cách tiếp theo, còn các mảnh nhỏ hơn được gom liên tiếp lại sao cho tổng độ dài không vượt quá kích thước chunk tối đa.
+> Áp dụng thuật toán đệ quy thử nghiệm danh sách phân cách theo ưu tiên `["\n\n", "\n", ". ", " "]`. Trường hợp cơ sở (base case) là khi đoạn văn bản có độ dài $\le \text{chunk\_size}$ hoặc không còn dấu phân cách nào. Thuật toán tách văn bản theo phân cách hiện tại, nếu mảnh nào vẫn vượt quá `chunk\_size` thì gọi đệ quy `_split` với danh sách phân cách tiếp theo, còn các mảnh nhỏ hơn được gom liên tiếp lại sao cho tổng độ dài không vượt quá kích thước chunk tối đa.
+
 
 ### Lớp EmbeddingStore
 
