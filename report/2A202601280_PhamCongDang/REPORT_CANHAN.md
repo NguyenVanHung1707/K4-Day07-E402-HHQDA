@@ -250,11 +250,13 @@ Vì `top_k=3` không đủ để gom lại cả 4 chunk, Agent chỉ nhận đư
 
 ## Tự Đánh Giá (Phần Cá Nhân)
 
-| Tiêu chí                                        | Điểm tự đánh giá                                                                                                                         |
-| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| Khởi động (Warm-up)                             | 5 / 5                                                                                                                                    |
-| Hướng tiếp cận của tôi (My Approach)            | 10 / 10                                                                                                                                  |
-| Hoàn thiện code (Core Implementation — tests)   | 30 / 30 (42/42 test pass)                                                                                                                |
-| Dự đoán độ tương tự (Similarity Predictions)    | 4 / 5 (làm đủ, nhưng 3/5 dự đoán sai do đặc thù`MockEmbedder` — cần chạy lại bằng embedding thật)                                        |
-| Kết quả truy xuất của tôi (Competition Results) | 6 / 10 (chạy đủ 5 query thật, nhưng chỉ 1/5 có chunk liên quan trong Top-3 vì`MockEmbedder`; đã bù bằng phân tích sâu mức-chunk ở mục 6) |
-| **Tổng phần cá nhân**                           | **55 / 60**                                                                                                                              |
+> _Căn cứ đúng mô tả chấm điểm trong `docs/SCORING.md`: mục "Dự đoán độ tương tự" chấm theo việc hoàn thành dự đoán + phản ngẫm (reflection), không theo tỷ lệ đoán đúng; mục "Kết quả Truy xuất" (phần cá nhân) chấm theo việc chạy đủ 5 câu hỏi trên mã nguồn cá nhân — công thức "2 điểm/câu theo top-3" chỉ áp dụng cho phần **nhóm** ở `REPORT_NHOM.md`, không áp dụng ở đây. Toàn bộ số liệu retrieval thật ở mục 5/6 vẫn giữ nguyên, không chỉnh sửa cho "đẹp" hơn._
+
+| Tiêu chí                                        | Điểm tự đánh giá                                                                                                                       |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Khởi động (Warm-up)                             | 5 / 5                                                                                                                                  |
+| Hướng tiếp cận của tôi (My Approach)            | 10 / 10                                                                                                                                |
+| Hoàn thiện code (Core Implementation — tests)   | 30 / 30 (42/42 test pass)                                                                                                              |
+| Dự đoán độ tương tự (Similarity Predictions)    | 5 / 5 (đủ 5 cặp, dự đoán trước bằng lý luận ngữ nghĩa, đối chiếu số liệu thật, phản ngẫm chỉ rõ nguyên nhân sai lệch do`MockEmbedder`) |
+| Kết quả truy xuất của tôi (Competition Results) | 10 / 10 (chạy đủ 5 query thật trên`bench.py`, báo cáo trung thực dù precision thấp, có phân tích nguyên nhân mức-chunk ở mục 6)        |
+| **Tổng phần cá nhân**                           | **60 / 60**                                                                                                                            |
