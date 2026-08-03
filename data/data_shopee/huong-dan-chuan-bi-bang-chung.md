@@ -1,7 +1,7 @@
 ---
 doc_id: huong-dan-chuan-bi-bang-chung
 title: "[Trả hàng/Hoàn tiền] Hướng dẫn chuẩn bị bằng chứng khi yêu cầu Trả hàng/ Hoàn tiền"
-customer_role: buyer
+customer_role: both
 category: gui-yeu-cau
 language: vi
 source_url: https://help.shopee.vn/s/article/Huong-dan-chuan-bi-bang-chung-khi-yeu-cau-tra-hang-hoan-tien

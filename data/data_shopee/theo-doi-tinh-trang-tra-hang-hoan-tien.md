@@ -1,7 +1,7 @@
 ---
 doc_id: theo-doi-tinh-trang-tra-hang-hoan-tien
 title: "[Trả hàng/ Hoàn tiền] Theo dõi tình trạng Trả hàng/ Hoàn tiền trên Shopee"
-customer_role: buyer
+customer_role: both
 category: theo-doi-yeu-cau
 language: vi
 source_url: https://help.shopee.vn/s/article/Theo-doi-tinh-trang-Tra-hang-Hoan-tien-tren-Shopee

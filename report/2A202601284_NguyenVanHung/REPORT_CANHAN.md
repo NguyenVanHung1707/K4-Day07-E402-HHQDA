@@ -154,20 +154,21 @@ tests/test_solution.py::TestEmbeddingStoreDeleteDocument::test_delete_returns_tr
 
 ## 5. Kết quả truy xuất của tôi (Competition Results) — Cá nhân (10 điểm)
 
-Chạy 5 câu hỏi đánh giá benchmark K4 trên mã nguồn cá nhân trong gói `src` với tập dữ liệu khởi động `data/k4_ecommerce/`:
+Chạy 5 câu hỏi đánh giá benchmark K4 của nhóm trên mã nguồn cá nhân trong gói `src` với tập dữ liệu `data/data_shopee/`:
 
 | # | Câu hỏi (Query) | Top-1 Chunk truy xuất được (tóm tắt) | Điểm Score | Có liên quan không? (Relevant) | Câu trả lời của Agent (tóm tắt) |
 |---|-------|--------------------------------|-------|-----------|------------------------|
-| 1 | Thời hạn đổi trả hàng dành cho người mua là bao lâu? (`filter: buyer`) | "Người mua cần gửi yêu cầu đổi trả trong thời hạn được nêu trên trang sản phẩm..." | 0.0737 | Có | "Thời hạn đổi trả được xác định theo thời hạn niêm yết trên trang sản phẩm của sàn." |
-| 2 | Người bán có trách nhiệm gì khi nhận yêu cầu đổi trả? (`filter: seller`) | "Người bán có trách nhiệm phản hồi theo quy trình của sàn khi nhận được yêu cầu..." | 0.1245 | Có | "Người bán phải tiếp nhận và xử lý phản hồi yêu cầu đổi trả theo đúng quy định." |
-| 3 | Điều kiện niêm yết sản phẩm đối với người bán là gì? (`filter: seller`) | "Người bán cần tuân thủ quy định đăng bán, mô tả chính xác và minh bạch sản phẩm..." | 0.1245 | Có | "Người bán phải cung cấp đầy đủ thông tin mô tả sản phẩm và tuân thủ chính sách gian hàng." |
-| 4 | Bằng chứng cần thiết khi yêu cầu đổi trả hàng bị lỗi? (`filter: buyer`) | "Yêu cầu phải kèm bằng chứng phù hợp khi hàng bị lỗi hoặc không đúng mô tả." | 0.1852 | Có | "Người mua cần cung cấp hình ảnh/video bằng chứng chứng minh sản phẩm bị lỗi." |
-| 5 | Quy trình xử lý phản hồi yêu cầu đổi trả hàng? (`unfiltered`) | "Người bán có trách nhiệm phản hồi theo quy trình của sàn khi nhận yêu cầu đổi trả..." | 0.1118 | Có | "Quy trình bao gồm người mua gửi yêu cầu kèm bằng chứng và người bán phản hồi xử lý." |
+| 1 | Dung lượng tối đa đối với bằng chứng ảnh/video khi yêu cầu Trả hàng/Hoàn tiền là bao nhiêu? Nếu vượt quá dung lượng thì làm thế nào? (`filter: customer_role="both"`) | "Dung lượng tối đa: Hình ảnh không quá 5MB/ảnh, Video không quá 100 MB/video (tối đa 1 phút)... tải lên YouTube hoặc Google Drive..." | 0.2752 | Có | "Hình ảnh không quá 5MB/ảnh, Video không quá 100MB. Nếu quá dung lượng hãy upload Youtube/Drive để công khai và gửi link." |
+| 2 | Thời gian xử lý yêu cầu Trả hàng/Hoàn tiền và thời gian hoàn tiền trên Shopee mất bao lâu? (`filter: customer_role="buyer"`) | "Thời gian xử lý: 3 - 5 ngày làm việc... Thời gian hoàn tiền: 1 - 14 ngày làm việc tùy phương thức thanh toán." | 0.3545 | Có | "Thời gian xử lý yêu cầu là 3-5 ngày làm việc và thời gian hoàn tiền từ 1-14 ngày làm việc." |
+| 3 | Điều kiện bắt buộc về thông tin tài khoản để sử dụng Voucher ShopeeFood trong gói ShopeeVIP là gì? (`filter: category="voucher-khuyen-mai"`) | "Việc liên kết chỉ thành công khi số điện thoại đăng ký tài khoản Shopee và tài khoản ShopeeFood giống nhau..." | 0.1899 | Có | "Số điện thoại đăng ký tài khoản Shopee và ShopeeFood bắt buộc phải trùng khớp nhau." |
+| 4 | Số lượng mã giảm giá tối đa có thể lưu vào Kho Voucher trên ứng dụng Shopee là bao nhiêu? (`unfiltered`) | "Số lượng các mã giảm giá có thể lưu vào Kho Voucher hoàn toàn không bị giới hạn." | 0.1760 | Có | "Số lượng mã giảm giá lưu vào Kho Voucher hoàn toàn không bị giới hạn." |
+| 5 | Người dùng có thể theo dõi trạng thái xử lý Trả hàng/Hoàn tiền qua những kênh nào ngoài mục Đơn Mua? (`filter: customer_role="both"`) | "Tất cả các thông tin/trạng thái xử lý Trả hàng hoàn tiền sẽ được cập nhật qua Mục Thông báo, Email, Banner điện thoại và Chatbot Tép Thám Tử..." | 0.1433 | Có | "Có thể theo dõi qua Mục Thông báo app, Email liên kết, biểu ngữ điện thoại và Trò Chuyện Với Shopee." |
 
 **Bao nhiêu câu hỏi trả về chunk có liên quan trong top-3?** **5 / 5**
 
 **Điều hay nhất tôi học được từ việc thực thi:**
-> Tiền lọc bằng siêu dữ liệu (`metadata_filter={"customer_role": "buyer"}` hoặc `seller`) giúp khoanh vùng phạm vi tìm kiếm vô cùng chính xác, loại bỏ hẳn nhiễu từ các chính sách dành cho đối tượng không liên quan trước khi tính toán độ tương đồng vector.
+> Tiền lọc bằng siêu dữ liệu (`metadata_filter={"customer_role": "both"}` hoặc `{"category": "voucher-khuyen-mai"}`) giúp khoanh vùng tập dữ liệu truy xuất chính xác, loại bỏ hẳn nhiễu từ các văn bản không thuộc phạm vi trước khi tính toán vector similarity.
+
 
 ---
 
