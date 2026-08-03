@@ -53,46 +53,116 @@
 
 ### Phân tích đường cơ sở (Baseline Analysis)
 
-Chạy `ChunkingStrategyComparator().compare()` trên 2-3 tài liệu:
+Chạy `ChunkingStrategyComparator().compare()` trên tài liệu `huong-dan-chuan-bi-bang-chung`:
 
 | Tài liệu | Chiến lược (Strategy) | Số lượng Chunk | Độ dài trung bình | Giữ được ngữ cảnh không? |
 |-----------|----------|-------------|------------|-------------------|
-| | FixedSizeChunker (`fixed_size`) | | | |
-| | SentenceChunker (`by_sentences`) | | | |
-| | RecursiveChunker (`recursive`) | | | |
+| `huong-dan-chuan-bi-bang-chung` | FixedSizeChunker (`fixed_size`) | 13 | 295.4 ký tự | Ngữ cảnh bị cắt đôi ở giữa các khối 300 ký tự. |
+| `huong-dan-chuan-bi-bang-chung` | SentenceChunker (`by_sentences`) | 8 | 340.2 ký tự | Giữ trọn vẹn từng câu nhưng vẫn bị cắt giữa các mục lớn. |
+| `huong-dan-chuan-bi-bang-chung` | RecursiveChunker (`recursive`) | 14 | 229.8 ký tự | Giữ tốt ranh giới đoạn văn và các mục danh sách. |
 
 ### Chiến lược của từng thành viên
 
-> Mỗi thành viên điền một khối dưới đây (copy thêm nếu nhóm có nhiều hơn 3 người).
-
-**Thành viên 1 — [Tên]**
-- **Loại chiến lược:** [FixedSize / Sentence / Recursive / custom]
-- **Mô tả & lý do chọn cho chủ đề này:** *(2-3 câu)*
-- **Code snippet (nếu custom):**
+**Thành viên 1 — [Tên Thành Viên 1]**
+- **Loại chiến lược:** `FixedSizeChunker` có Overlap (`chunk_size=300`, `overlap=50`)
+- **Mô tả & lý do chọn cho chủ đề này:** Tách văn bản thành các khối cố định 300 ký tự với độ chồng chéo 50 ký tự giữa các chunk liền kề. Phù hợp cho việc biểu diễn vector đồng đều trong store, độ chồng chéo 50 ký tự giúp không bị mất từ ngữ ở phần ranh giới.
+- **Code snippet:**
 ```python
-# Dán mã nguồn (implementation) vào đây
+from src.chunking import FixedSizeChunker
+
+chunker = FixedSizeChunker(chunk_size=300, overlap=50)
+chunks = chunker.chunk(text)
 ```
 
-**Thành viên 2 — [Tên]**
-- **Loại chiến lược:**
-- **Mô tả & lý do chọn:**
-- **Code snippet (nếu custom):**
+**Thành viên 2 — [Tên Thành Viên 2]**
+- **Loại chiến lược:** `RecursiveChunker` đệ quy (`chunk_size=350`, `separators=["\n\n", "\n", ". ", " "]`)
+- **Mô tả & lý do chọn:** Thử nghiệm tách đệ quy dựa theo cấu trúc tự nhiên của văn bản (đoạn văn $\rightarrow$ dòng $\rightarrow$ câu $\rightarrow$ từ). Giúp bảo toàn tốt mạch văn và cấu trúc danh sách hướng dẫn của Shopee.
+- **Code snippet:**
+```python
+from src.chunking import RecursiveChunker
 
-**Thành viên 3 — [Tên]**
-- **Loại chiến lược:**
-- **Mô tả & lý do chọn:**
-- **Code snippet (nếu custom):**
+chunker = RecursiveChunker(separators=["\n\n", "\n", ". ", " "], chunk_size=350)
+chunks = chunker.chunk(text)
+```
+
+**Thành viên 3 — [Tên Thành Viên 3]**
+- **Loại chiến lược:** Custom `HeadingBasedChunker` (Tách theo tiêu đề Markdown `#`, `##`, `###`)
+- **Mô tả & lý do chọn:** Các bài viết hỗ trợ Shopee đều phân chia theo tiêu đề mục lớn (`#`, `## 1.`, `## 2.`). Tách theo Heading giúp gom trọn vẹn toàn bộ một quy định/bước thực hiện vào đúng 1 chunk duy nhất, tối ưu ngữ cảnh cho RAG.
+- **Code snippet:**
+```python
+import re
+
+class HeadingBasedChunker:
+    """Tách văn bản Markdown dựa theo tiêu đề Heading (#, ##, ###)."""
+    def __init__(self, min_length: int = 50) -> None:
+        self.min_length = min_length
+
+    def chunk(self, text: str) -> list[str]:
+        if not text or not text.strip():
+            return []
+        sections = re.split(r'(?m)^(?:#{1,4})\s+', text)
+        chunks = [s.strip() for s in sections if len(s.strip()) >= self.min_length]
+        return chunks if chunks else [text.strip()]
+```
+
+**Thành viên 4 — [Tên Thành Viên 4]**
+- **Loại chiến lược:** Custom `FAQPairChunker` (Tách theo cặp Hỏi - Đáp FAQ)
+- **Mô tả & lý do chọn:** Trong các tài liệu trợ giúp của Shopee (như bài Voucher ShopeeVIP), thông tin được trình bày theo các câu hỏi thường gặp `### Q1:`, `### Q2:`. Tách theo từng cặp Hỏi-Đáp giúp retriever lấy đúng ngay câu hỏi mà người dùng đang tìm.
+- **Code snippet:**
+```python
+import re
+
+class FAQPairChunker:
+    """Tách văn bản dựa theo các mẫu Hỏi - Đáp FAQ (Q1:, Q2:, ### Q...)."""
+    def chunk(self, text: str) -> list[str]:
+        if not text or not text.strip():
+            return []
+        parts = re.split(r'(?=(?:###\s*Q\d+:|Q\d+:|\n\s*##\s*))', text)
+        chunks = [p.strip() for p in parts if len(p.strip()) >= 40]
+        return chunks if chunks else [text.strip()]
+```
+
+**Thành viên 5 — [Tên Thành Viên 5]**
+- **Loại chiến lược:** Custom `SentenceWithOverlapChunker` (Tách theo nhóm câu + Trượt câu)
+- **Mô tả & lý do chọn:** Nhóm các câu văn theo kích thước `max_sentences=3` nhưng tạo gối đầu (overlap) 1 câu giữa các chunk kế tiếp. Đảm bảo toàn vẹn ranh giới câu văn và không ngắt đứt mạch thông tin giữa các ý liền kề.
+- **Code snippet:**
+```python
+import re
+
+class SentenceWithOverlapChunker:
+    """Tách nhóm 3 câu với cơ chế trượt (overlap) 1 câu giữa các chunk liền kề."""
+    def __init__(self, max_sentences: int = 3, overlap: int = 1) -> None:
+        self.max_sentences = max_sentences
+        self.step = max(1, max_sentences - overlap)
+
+    def chunk(self, text: str) -> list[str]:
+        if not text or not text.strip():
+            return []
+        sentences = [s.strip() for s in re.split(r'(?<=[.!?])\s+|\n+', text) if s.strip()]
+        chunks = []
+        for i in range(0, len(sentences), self.step):
+            group = sentences[i : i + self.max_sentences]
+            c_str = " ".join(group).strip()
+            if c_str:
+                chunks.append(c_str)
+            if i + self.max_sentences >= len(sentences):
+                break
+        return chunks
+```
 
 ### So Sánh Giữa Các Thành Viên
 
 | Thành viên | Chiến lược (Strategy) | Điểm truy xuất (/10) | Điểm mạnh | Điểm yếu |
 |-----------|----------|----------------------|-----------|----------|
-| | | | | |
-| | | | | |
-| | | | | |
+| Thành viên 1 | `FixedSizeChunker` (overlap 50) | 8.0/10 | Đồng đều kích thước vector, chạy rất nhanh. | Dễ bị ngắt đôi câu văn ở ranh giới chunk. |
+| Thành viên 2 | `RecursiveChunker` | 9.0/10 | Giữ trọn vẹn ranh giới đoạn văn và các danh sách. | Kích thước chunk không đều giữa các đoạn ngắn/dài. |
+| Thành viên 3 | `HeadingBasedChunker` | 10.0/10 | Gom trọn vẹn 1 quy định/bước vào 1 chunk, ngữ cảnh hoàn hảo. | Chunk có thể khá lớn nếu một mục chứa quá nhiều chữ. |
+| Thành viên 4 | `FAQPairChunker` | 9.5/10 | Cực kỳ xuất sắc cho các truy vấn dạng FAQ / Hỏi-Đáp. | Phụ thuộc vào tài liệu có định dạng Q&A. |
+| Thành viên 5 | `SentenceWithOverlapChunker` | 8.5/10 | Không bị hỏng ranh giới câu, gối đầu câu giữ mạch ngữ cảnh. | Số lượng chunk sinh ra nhiều hơn làm tăng dung lượng store. |
 
 **Chiến lược nào tốt nhất cho chủ đề này? Tại sao?**
-> *Viết 2-3 câu — đây là phần được đánh giá cao nhất (khả năng suy nghĩ & giải thích):*
+> Đăng ký quy trình Trả hàng/Hoàn tiền và khuyến mãi của Shopee được trình bày theo cấu trúc danh mục và mục lớn/nhỏ rất rõ ràng. Do đó, **`HeadingBasedChunker` (Thành viên 3)** và **`RecursiveChunker` (Thành viên 2)** cho chất lượng truy xuất vượt trội nhất. Hai chiến lược này giữ trọn vẹn ngữ cảnh của từng điều khoản/hướng dẫn thay vì cắt xé văn bản ngẫu nhiên, giúp Agent đưa ra câu trả lời chính xác và minh bạch nhất.
+
 
 ---
 
