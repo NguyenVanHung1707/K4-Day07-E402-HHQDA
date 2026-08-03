@@ -60,8 +60,6 @@ Giải thích cách tiếp cận của bạn khi lập trình (implement) các p
 
 **`SentenceChunker.chunk`** — hướng tiếp cận:
 
-> Dùng `re.split(r"([.!?])", text)` — regex có nhóm bắt (capturing group) để tách văn bản xen kẽ giữa đoạn chữ và dấu câu, nhờ vậy dấu `.`/`!`/`?` được giữ lại thay vì bị loại bỏ. Duyệt qua các phần tách được, ghép dần vào biến `current`; khi gặp đúng 1 ký tự dấu câu thì gắn vào `current`, `strip()` rồi chốt thành 1 câu và reset buffer. Cuối cùng gộp tối đa `max_sentences_per_chunk` câu liên tiếp bằng `" ".join()`. Edge case đã xử lý: text rỗng trả `[]`; phần dư sau dấu câu cuối cùng (ví dụ khoảng trắng cuối văn bản) chỉ được thêm vào nếu `strip()` còn nội dung, tránh sinh câu rỗng.
-
 **`RecursiveChunker.chunk` / `_split`** — hướng tiếp cận:
 
 > Tôi cấu hình `chunk_size=350`, `separators=["\n\n", "\n", ". ", " "]` — thử cắt theo ranh giới lớn nhất trước (đoạn văn → dòng → câu → từ) để giữ mạch văn và cấu trúc danh sách bước hướng dẫn trong tài liệu Shopee. `_split` đệ quy: tách `current_text` theo separator ưu tiên cao nhất còn lại, rồi gộp dần các phần nhỏ vào một buffer cho đến ngay trước khi vượt `chunk_size` mới "chốt" thành một chunk; phần nào tự nó đã dài hơn `chunk_size` thì gọi đệ quy `_split` tiếp với separator ưu tiên thấp hơn (ví dụ đoạn quá dài thì thử cắt theo dòng, rồi theo câu, rồi theo từ).
@@ -149,15 +147,15 @@ tests/test_solution.py::TestEmbeddingStoreDeleteDocument::test_delete_returns_tr
 
 ## 4. Dự đoán độ tương tự (Similarity Predictions) — Cá nhân (5 điểm)
 
-| Cặp | Câu A | Câu B | Dự đoán | Điểm thực tế (`MockEmbedder`) | Đúng? |
-| --- | ----- | ----- | ------- | ------------------------------ | ----- |
-| 1 | "Tôi muốn trả lại sản phẩm bị lỗi." | "Tôi cần hoàn trả hàng vì sản phẩm hư hỏng." | cao (đồng nghĩa khác từ) | −0.1762 → thấp | Sai |
-| 2 | "Voucher giảm giá của tôi khi nào hết hạn?" | "Mã ưu đãi của tôi còn hiệu lực đến ngày nào?" | cao (đồng nghĩa khác từ) | 0.2632 → thấp/trung bình | Sai |
-| 3 | "Làm sao để liên kết tài khoản ShopeeFood?" | "Thời tiết hôm nay thế nào?" | thấp (khác chủ đề hoàn toàn) | −0.3351 → thấp | Đúng |
-| 4 | "Thời gian hoàn tiền là bao lâu?" | "Thời gian giao hàng dự kiến là bao lâu?" | cao (cùng miền "thời gian xử lý đơn hàng") | −0.2619 → thấp | Sai |
-| 5 | "Cách chuẩn bị video bằng chứng khi khiếu nại hàng lỗi." | "Cách nấu phở bò tại nhà." | thấp (khác chủ đề hoàn toàn) | −0.0074 → thấp | Đúng |
+| Cặp | Câu A                                                    | Câu B                                          | Dự đoán                                    | Điểm thực tế (`MockEmbedder`) | Đúng? |
+| --- | -------------------------------------------------------- | ---------------------------------------------- | ------------------------------------------ | ----------------------------- | ----- |
+| 1   | "Tôi muốn trả lại sản phẩm bị lỗi."                      | "Tôi cần hoàn trả hàng vì sản phẩm hư hỏng."   | cao (đồng nghĩa khác từ)                   | −0.1762 → thấp                | Sai   |
+| 2   | "Voucher giảm giá của tôi khi nào hết hạn?"              | "Mã ưu đãi của tôi còn hiệu lực đến ngày nào?" | cao (đồng nghĩa khác từ)                   | 0.2632 → thấp/trung bình      | Sai   |
+| 3   | "Làm sao để liên kết tài khoản ShopeeFood?"              | "Thời tiết hôm nay thế nào?"                   | thấp (khác chủ đề hoàn toàn)               | −0.3351 → thấp                | Đúng  |
+| 4   | "Thời gian hoàn tiền là bao lâu?"                        | "Thời gian giao hàng dự kiến là bao lâu?"      | cao (cùng miền "thời gian xử lý đơn hàng") | −0.2619 → thấp                | Sai   |
+| 5   | "Cách chuẩn bị video bằng chứng khi khiếu nại hàng lỗi." | "Cách nấu phở bò tại nhà."                     | thấp (khác chủ đề hoàn toàn)               | −0.0074 → thấp                | Đúng  |
 
-*(Điểm thực tế lấy trực tiếp từ `compute_similarity(_mock_embed(A), _mock_embed(B))` — số liệu thật, không ước lượng. Ngưỡng quy đổi cao/thấp: score ≥ 0.3 → cao, còn lại → thấp, vì `MockEmbedder` gần như không bao giờ cho vector đồng hướng mạnh.)*
+_(Điểm thực tế lấy trực tiếp từ `compute_similarity(_mock_embed(A), _mock_embed(B))` — số liệu thật, không ước lượng. Ngưỡng quy đổi cao/thấp: score ≥ 0.3 → cao, còn lại → thấp, vì `MockEmbedder` gần như không bao giờ cho vector đồng hướng mạnh.)_
 
 **Kết quả nào bất ngờ nhất? Điều này nói gì về cách embeddings biểu diễn ý nghĩa?**
 
@@ -169,29 +167,94 @@ tests/test_solution.py::TestEmbeddingStoreDeleteDocument::test_delete_returns_tr
 
 Chạy **5 câu hỏi đánh giá của nhóm** trên mã nguồn cá nhân của bạn trong gói `src`. **5 câu hỏi này phải trùng với các thành viên cùng nhóm** (xem `REPORT_NHOM.md`).
 
-| #   | Câu hỏi (Query) | Top-1 Chunk truy xuất được (tóm tắt) | Điểm Score | Có liên quan không? (Relevant) | Câu trả lời của Agent (tóm tắt) |
-| --- | --------------- | ------------------------------------ | ---------- | ------------------------------ | ------------------------------- |
-| 1   |                 |                                      |            |                                |                                 |
-| 2   |                 |                                      |            |                                |                                 |
-| 3   |                 |                                      |            |                                |                                 |
-| 4   |                 |                                      |            |                                |                                 |
-| 5   |                 |                                      |            |                                |                                 |
+| #                     | Câu hỏi (Query)                                                                                             | Top-1 Chunk truy xuất được (tóm tắt)                                                            | Điểm Score | Có liên quan không? (Relevant)                               | Câu trả lời của Agent (tóm tắt)                                                                    |
+| --------------------- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ---------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| 1 (Số liệu)           | Thời gian xử lý/hoàn tiền yêu cầu Trả hàng/Hoàn tiền?                                                       | `huong-dan-gui-yeu-cau-tra-hang-hoan-tien` — chunk mở đầu (đoạn giới thiệu, KHÔNG chứa số liệu) | 0.2774     | Không (đúng doc, sai chunk)                                  | Agent lấy ngữ cảnh từ đoạn mở đầu + 2 chunk không liên quan, không có số liệu 3-5 ngày / 1-14 ngày |
+| 2 (Điều kiện)         | Điều kiện liên kết Shopee ↔ ShopeeFood?                                                                     | `theo-doi-tinh-trang-tra-hang-hoan-tien` — chunk "Mục Thông báo"                                | 0.2983     | Không                                                        | Agent trả lời lạc đề (dựa trên chunk theo dõi đơn hàng, không phải điều kiện liên kết SĐT)         |
+| 3 (Quy trình)         | Các bước gửi yêu cầu Trả hàng/Hoàn tiền trực tiếp?                                                          | `kho-voucher-shopee-la-gi` — danh sách loại Voucher                                             | 0.2332     | Không                                                        | Agent trả lời sai hẳn chủ đề (Voucher thay vì quy trình trả hàng)                                  |
+| 4 (Liệt kê)           | Kho Voucher lọc theo những loại nào?                                                                        | `huong-dan-chuan-bi-bang-chung` — đoạn quy định bổ sung bằng chứng                              | 0.3232     | Không                                                        | Agent không liệt kê được các loại Voucher thật                                                     |
+| 5 (Ngoại lệ + Filter) | Người bán theo dõi tình trạng Trả hàng/Hoàn tiền qua kênh nào? (`metadata_filter={"customer_role":"both"}`) | `theo-doi-tinh-trang-tra-hang-hoan-tien` — chunk Bước 4 (đúng doc)                              | 0.1832     | Một phần (đúng doc nhờ filter, top-2 mới có "Mục Thông báo") | Agent trả lời đúng doc nguồn nhờ filter loại bớt nhiễu, dù chunk top-1 chưa phải đoạn tối ưu nhất  |
 
-**Bao nhiêu câu hỏi trả về chunk có liên quan trong top-3?** \_\_ / 5
+**Bao nhiêu câu hỏi trả về chunk có liên quan trong top-3?** **1** / 5 (chỉ Q5 — nhờ có `metadata_filter`; Q1–Q4 dùng `search()` thường đều lệch)
 
 **Điều hay nhất tôi học được từ thành viên khác / nhóm khác (qua demo):**
 
-> _Viết 2-3 câu:_
+> _Viết 2-3 câu (điền sau khi demo chéo với các thành viên FixedSizeChunker/SentenceChunker trong nhóm):_
+
+> **Lưu ý minh bạch số liệu:** Bảng trên chạy thật bằng `bench.py` trên corpus `data/data_shopee` (5 tài liệu Shopee thật) với `RecursiveChunker(chunk_size=350)` + **`MockEmbedder`** (vector giả lập từ hash MD5, không phản ánh ngữ nghĩa thật — xem cảnh báo có sẵn trong `main.py`). Vì vậy precision thấp phản ánh đúng hạn chế của MockEmbedder, không hẳn là lỗi của chiến lược chunking. Phân tích sâu hơn (tách riêng ảnh hưởng của chunking vs. embedding) ở mục 6 bên dưới. Trước khi nộp bản cuối, khuyến nghị chạy lại với `EMBEDDING_PROVIDER=local` (cần `pip install -r requirements-local.txt`) để có số liệu phản ánh đúng chất lượng ngữ nghĩa.
+
+---
+
+## 6. Phân tích chuyên sâu Chiến lược Cá nhân (`RecursiveChunker`)
+
+> _Mục bổ sung theo yêu cầu Checkpoint 6 (không nằm trong thang 60 điểm gốc ở đầu file) — đào sâu mục 5 bằng phân tích ở mức chunk thay vì chỉ `doc_id`. Toàn bộ số liệu dưới đây chạy thật trên corpus K4 (`data/data_shopee` — chính sách/hỗ trợ khách hàng Shopee), không dùng dữ liệu K3 (quy định đại học)._
+
+### 6.1. Cấu hình Strategy Cá nhân
+
+- **Strategy Name:** `RecursiveChunker_Size350_Paragraph-Line-Sentence-Word`
+- **Thuật toán:** `RecursiveChunker` — đệ quy theo phân cấp separator `["\n\n", "\n", ". ", " "]`, hết separator thì cắt cố định (fixed-size).
+- **Tham số:** `chunk_size=350`. _(Lưu ý: `RecursiveChunker` trong codebase của lab này **không có tham số `overlap`** — khác với `FixedSizeChunker`. Đây là một hạn chế thật của thuật toán, không phải thiếu sót khi cấu hình — xem mục 6.4.)_
+- **Embedding Model:** `MockEmbedder` (dim=64, vector giả lập từ hash MD5 nội dung). Đã thử cài `sentence-transformers` để chạy `LocalEmbedder` thật nhưng môi trường chạy thử bị giới hạn thời gian tải model nên chưa hoàn tất — số liệu dưới đây phản ánh đúng hành vi MockEmbedder, cần chạy lại `EMBEDDING_PROVIDER=local` để có số liệu ngữ nghĩa thật trước khi nộp.
+
+### 6.2. Kết quả Benchmark & Đánh giá mức Chunk (Precision & Coherence)
+
+Chấm theo sự xuất hiện của **chuỗi đặc trưng (gold string)** trong nội dung Top-3 thật (không chỉ `doc_id`):
+
+| Query ID | Dạng Query        | Gold Document (thật)                                | Trạng thái Retrieve (mức Chunk)                                                                                                                                      | Precision Top-3 (gold string)             | Chunk Coherence (độ toàn vẹn)                                                                                                                                                                                                    |
+| -------- | ----------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Q1       | Số liệu           | `huong-dan-gui-yeu-cau-tra-hang-hoan-tien.md`       | Đúng doc nhưng SAI chunk — Top-1 là đoạn mở đầu (`chunk_idx=0`), số liệu thật ("3 - 5 ngày làm việc", "1 - 14 ngày làm việc") nằm ở `chunk_idx=8,9`, không lọt Top-3 | 0/3                                       | Con số/đơn vị được giữ nguyên vẹn trong đúng 1 chunk (không bị cắt giữa số và đơn vị), nhưng chunk đó không được xếp hạng cao                                                                                                    |
+| Q2       | Điều kiện         | `huong-dan-su-dung-voucher-shopeefood-shopeevip.md` | Không lọt Top-3 — Top-1 lệch sang tài liệu theo dõi đơn hàng không liên quan                                                                                         | 0/3                                       | Câu điều kiện đầy đủ ("số điện thoại đăng ký tài khoản Shopee và tài khoản ShopeeFood giống nhau") nằm nguyên trong 1 chunk (`chunk_idx=2`, 285 ký tự) — chunker giữ toàn vẹn câu, vấn đề nằm ở xếp hạng chứ không phải chunking |
+| Q3       | Quy trình         | `huong-dan-gui-yeu-cau-tra-hang-hoan-tien.md`       | Bị cắt ngang quy trình — Top-1 sai hẳn chủ đề, Top-2 đúng doc nhưng là đoạn "Lưu ý" cuối bài (không phải quy trình 8 bước)                                           | 0/3                                       | **Bị vỡ:** quy trình 8 bước gốc bị `RecursiveChunker` cắt thành 4 chunk rời (`chunk_idx=1,2,3,4`), không chunk nào chứa trọn quy trình                                                                                           |
+| Q4       | Liệt kê           | `kho-voucher-shopee-la-gi.md`                       | Không lọt Top-3                                                                                                                                                      | 0/3                                       | Danh sách 7 loại Voucher bị cắt làm 2 chunk (`chunk_idx=2`: 5 loại đầu; `chunk_idx=3`: "Scan & Pay"/"Từ đối tác") — liệt kê không trọn vẹn trong 1 chunk                                                                         |
+| Q5       | Ngoại lệ / Filter | `theo-doi-tinh-trang-tra-hang-hoan-tien.md`         | Đúng doc khi CÓ filter (Top-1, Top-2); SAI hoàn toàn khi KHÔNG filter (toàn bộ Top-3 là tài liệu`customer_role=buyer`)                                               | 1/3 (có filter) so với 0/3 (không filter) | Chunk "Mục Thông báo" (`chunk_idx=3`) chứa đúng kênh theo dõi, được giữ toàn vẹn (1 đoạn Markdown hoàn chỉnh)                                                                                                                    |
+
+### 6.3. Phân tích A/B Metadata Filter (Query Q5)
+
+**Khi KHÔNG dùng filter (`store.search()`):**
+Top-3 = `huong-dan-gui-yeu-cau-tra-hang-hoan-tien` (0.2893), `kho-voucher-shopee-la-gi` (0.2280), `huong-dan-su-dung-voucher-shopeefood-shopeevip` (0.1882) — **cả 3 đều `customer_role=buyer`**, không có tài liệu nào áp dụng cho seller. Agent sẽ trả lời đúng "trend" chủ đề (trả hàng/hoàn tiền) nhưng sai đối tượng (không phải kênh dành cho người bán).
+
+**Khi CÓ dùng filter (`store.search_with_filter(..., metadata_filter={"customer_role": "both"})`):**
+Không gian tìm kiếm giảm từ **53 → 20 chunk** (chỉ giữ 2/5 tài liệu có `customer_role=both`). Top-3 gồm 2 chunk đúng nguồn (`theo-doi-tinh-trang-tra-hang-hoan-tien`, score 0.1832 & 0.1735) — Top-2 chứa đúng câu trả lời ("Mục Thông báo trên Ứng dụng Shopee").
+
+**Kết luận:** Lọc metadata trước (filter-first) loại bỏ đúng 33/53 chunk sai đối tượng _trước khi_ vector search chạy, nên dù `MockEmbedder` yếu (không hiểu ngữ nghĩa), kết quả vẫn cải thiện rõ rệt (từ 0/3 gold-hit lên có chunk đúng ở Top-2). Đây là bằng chứng thực nghiệm cho thấy **metadata filter bù đắp được một phần chất lượng embedding kém** — quan trọng hơn cả việc chọn chiến lược chunking trong trường hợp này.
+
+### 6.4. Failure Case & Nguyên nhân (Query Q3 — Quy trình)
+
+**Hiện tượng (verified bằng cách in trực tiếp output `RecursiveChunker(chunk_size=350)` trên `huong-dan-gui-yeu-cau-tra-hang-hoan-tien.md`):**
+Khối "Cách 1: Gửi yêu cầu trực tiếp tại trang đơn hàng" (8 bước liên tục) dài hơn nhiều so với `chunk_size=350`, bị cắt thành **4 chunk rời**:
+
+- `chunk[1]` (254 ký tự): Bước 1–3 (thiếu 2 lựa chọn con của Bước 3)
+- `chunk[2]` (296 ký tự): tiếp tục 2 lựa chọn của Bước 3
+- `chunk[3]` (313 ký tự): Bước 4–7
+- `chunk[4]` (205 ký tự): tiếp tục Bước 7 + Bước 8
+
+Vì `top_k=3` không đủ để gom lại cả 4 chunk, Agent chỉ nhận được một phần quy trình (hoặc — như benchmark thật ở trên cho thấy — thậm chí không chunk nào trong 4 chunk này lọt vào Top-3 vì bị các chunk chủ đề khác (Voucher) xếp hạng cao hơn).
+
+**Nguyên nhân sâu xa:**
+
+1. `chunk_size=350` quá nhỏ so với độ dài trung bình một quy trình nhiều bước trong help center Shopee (~800–900 ký tự cho quy trình 8 bước).
+2. `RecursiveChunker` trong codebase **không hỗ trợ `overlap`** (khác `FixedSizeChunker`) → mất hoàn toàn phần nối ngữ cảnh giữa 2 chunk liên tiếp, không có cơ chế "cầu nối" như overlap mang lại.
+3. Xếp hạng theo toàn văn chunk khiến chunk chứa "Bước 4–7" (nhiều từ hành động) và chunk chứa "Bước 1–3" (nhiều từ bối cảnh mở đầu) cạnh tranh điểm số không đều, dù cùng thuộc 1 quy trình.
+
+**Đề xuất cải tiến:**
+
+- Tăng `chunk_size` lên khoảng 600–700 cho các tài liệu dạng hướng dẫn nhiều bước (loại tài liệu phổ biến nhất trong domain Shopee help center).
+- Bổ sung cơ chế overlap cho `RecursiveChunker` (hiện chưa có trong code) để giữ một phần ngữ cảnh nối giữa 2 chunk liên tiếp.
+- Cân nhắc chunk theo heading Markdown (`### Cách 1`, `### Cách 2`) thay vì thuần túy theo dòng/khoảng trắng, để gom trọn 1 "Cách" thực hiện thành 1 đơn vị chunk.
+
+### 6.5. Đóng góp vào `REPORT_NHOM.md`
+
+**So sánh Strategy:** `RecursiveChunker` (`chunk_size=350`, không overlap) tôn trọng ranh giới đoạn/dòng/câu tốt hơn cắt cứng thuần túy (không bao giờ cắt giữa từ), nhưng với các quy trình nhiều bước dài hơn `chunk_size`, nó vẫn bị vỡ tính toàn vẹn (coherence) tương tự `FixedSizeChunker` — vì thiếu overlap để bù đắp. Khuyến nghị nhóm: (1) tăng `chunk_size` cho tài liệu dạng quy trình, (2) đánh giá lại toàn bộ benchmark bằng `EMBEDDING_PROVIDER=local` thay vì Mock trước khi chốt kết luận "chiến lược nào tốt nhất", vì với Mock, sai số ngữ nghĩa lấn át gần như hoàn toàn ảnh hưởng thật của chunking (Q1–Q4 đều 0/3 bất kể coherence chunk tốt hay xấu).
 
 ---
 
 ## Tự Đánh Giá (Phần Cá Nhân)
 
-| Tiêu chí                                          | Điểm tự đánh giá |
-| ------------------------------------------------- | ---------------- |
-| Khởi động (Warm-up)                               | / 5              |
-| Hướng tiếp cận của tôi (`RecursiveChunker.chunk`) | / 10             |
-| Hoàn thiện code (Core Implementation — tests)     | / 30             |
-| Dự đoán độ tương tự (Similarity Predictions)      | / 5              |
-| Kết quả truy xuất của tôi (Competition Results)   | / 10             |
-| **Tổng phần cá nhân**                             | **/ 60**         |
+| Tiêu chí                                        | Điểm tự đánh giá                                                                                                                         |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Khởi động (Warm-up)                             | 5 / 5                                                                                                                                    |
+| Hướng tiếp cận của tôi (My Approach)            | 10 / 10                                                                                                                                  |
+| Hoàn thiện code (Core Implementation — tests)   | 30 / 30 (42/42 test pass)                                                                                                                |
+| Dự đoán độ tương tự (Similarity Predictions)    | 4 / 5 (làm đủ, nhưng 3/5 dự đoán sai do đặc thù`MockEmbedder` — cần chạy lại bằng embedding thật)                                        |
+| Kết quả truy xuất của tôi (Competition Results) | 6 / 10 (chạy đủ 5 query thật, nhưng chỉ 1/5 có chunk liên quan trong Top-3 vì`MockEmbedder`; đã bù bằng phân tích sâu mức-chunk ở mục 6) |
+| **Tổng phần cá nhân**                           | **55 / 60**                                                                                                                              |
