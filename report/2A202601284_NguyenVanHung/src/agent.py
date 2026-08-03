@@ -17,10 +17,14 @@ class KnowledgeBaseAgent:
         self.store = store
         self.llm_fn = llm_fn
 
-    def answer(self, question: str, top_k: int = 3) -> str:
-        results = self.store.search(question, top_k=top_k)
+    def answer(self, question: str, top_k: int = 3, metadata_filter: dict | None = None) -> str:
+        if metadata_filter:
+            results = self.store.search_with_filter(question, top_k=top_k, metadata_filter=metadata_filter)
+        else:
+            results = self.store.search(question, top_k=top_k)
         contexts = [r["content"] for r in results if "content" in r]
         context_str = "\n---\n".join(contexts)
         prompt = f"Context:\n{context_str}\n\nQuestion: {question}\nAnswer:"
         return self.llm_fn(prompt)
+
 

@@ -155,20 +155,21 @@ tests/test_solution.py::TestEmbeddingStoreDeleteDocument::test_delete_returns_tr
 
 ## 5. Kết quả truy xuất của tôi (Competition Results) — Cá nhân (10 điểm)
 
-Chạy 5 câu hỏi đánh giá benchmark K4 của nhóm trên mã nguồn cá nhân trong gói `src` với tập dữ liệu `data/data_shopee/`:
+Chạy 5 câu hỏi đánh giá benchmark K4 của nhóm trên chiến lược cá nhân **`HeadingBasedChunker`** và mã nguồn gói `src` với tập dữ liệu `data/data_shopee/`:
 
 | # | Câu hỏi (Query) | Top-1 Chunk truy xuất được (tóm tắt) | Điểm Score | Có liên quan không? (Relevant) | Câu trả lời của Agent (tóm tắt) |
 |---|-------|--------------------------------|-------|-----------|------------------------|
-| 1 | Dung lượng tối đa đối với bằng chứng ảnh/video khi yêu cầu Trả hàng/Hoàn tiền là bao nhiêu? Nếu vượt quá dung lượng thì làm thế nào? (`filter: customer_role="both"`) | "Dung lượng tối đa: Hình ảnh không quá 5MB/ảnh, Video không quá 100 MB/video (tối đa 1 phút)... tải lên YouTube hoặc Google Drive..." | 0.2752 | Có | "Hình ảnh không quá 5MB/ảnh, Video không quá 100MB. Nếu quá dung lượng hãy upload Youtube/Drive để công khai và gửi link." |
-| 2 | Thời gian xử lý yêu cầu Trả hàng/Hoàn tiền và thời gian hoàn tiền trên Shopee mất bao lâu? (`filter: customer_role="buyer"`) | "Thời gian xử lý: 3 - 5 ngày làm việc... Thời gian hoàn tiền: 1 - 14 ngày làm việc tùy phương thức thanh toán." | 0.3545 | Có | "Thời gian xử lý yêu cầu là 3-5 ngày làm việc và thời gian hoàn tiền từ 1-14 ngày làm việc." |
-| 3 | Điều kiện bắt buộc về thông tin tài khoản để sử dụng Voucher ShopeeFood trong gói ShopeeVIP là gì? (`filter: category="voucher-khuyen-mai"`) | "Việc liên kết chỉ thành công khi số điện thoại đăng ký tài khoản Shopee và tài khoản ShopeeFood giống nhau..." | 0.1899 | Có | "Số điện thoại đăng ký tài khoản Shopee và ShopeeFood bắt buộc phải trùng khớp nhau." |
-| 4 | Số lượng mã giảm giá tối đa có thể lưu vào Kho Voucher trên ứng dụng Shopee là bao nhiêu? (`unfiltered`) | "Số lượng các mã giảm giá có thể lưu vào Kho Voucher hoàn toàn không bị giới hạn." | 0.1760 | Có | "Số lượng mã giảm giá lưu vào Kho Voucher hoàn toàn không bị giới hạn." |
-| 5 | Người dùng có thể theo dõi trạng thái xử lý Trả hàng/Hoàn tiền qua những kênh nào ngoài mục Đơn Mua? (`filter: customer_role="both"`) | "Tất cả các thông tin/trạng thái xử lý Trả hàng hoàn tiền sẽ được cập nhật qua Mục Thông báo, Email, Banner điện thoại và Chatbot Tép Thám Tử..." | 0.1433 | Có | "Có thể theo dõi qua Mục Thông báo app, Email liên kết, biểu ngữ điện thoại và Trò Chuyện Với Shopee." |
+| 1 | Dung lượng tối đa đối với bằng chứng ảnh/video khi yêu cầu Trả hàng/Hoàn tiền là bao nhiêu? Nếu vượt quá dung lượng thì làm thế nào? (`filter: customer_role="both"`) | "Quy định về bằng chứng: Hình ảnh không quá 5MB/ảnh, Video không quá 100MB/video (tối đa 1 phút). Nếu dung lượng lớn hơn thì tải lên YouTube/Drive rồi gửi đường dẫn..." | 0.3393 | Có | "Hình ảnh không quá 5MB/ảnh, Video không quá 100MB. Nếu quá dung lượng hãy upload Youtube/Drive ở chế độ công khai và gửi link." |
+| 2 | Thời gian xử lý yêu cầu Trả hàng/Hoàn tiền và thời gian hoàn tiền trên Shopee mất bao lâu? (`filter: customer_role="buyer"`) | "Lưu ý thời gian xử lý: Thời gian xử lý yêu cầu từ 3 - 5 ngày làm việc. Thời gian hoàn tiền từ 1 - 14 ngày làm việc tùy phương thức thanh toán." | 0.2598 | Có | "Thời gian xử lý yêu cầu là 3-5 ngày làm việc và thời gian hoàn tiền từ 1-14 ngày làm việc tùy phương thức thanh toán." |
+| 3 | Điều kiện bắt buộc về thông tin tài khoản để sử dụng Voucher ShopeeFood trong gói ShopeeVIP là gì? (`filter: category="voucher-khuyen-mai"`) | "Lưu ý tài khoản: Việc liên kết tài khoản Shopee và ShopeeFood chỉ thành công khi số điện thoại đăng ký 2 tài khoản trùng khớp nhau..." | 0.3497 | Có | "Số điện thoại đăng ký tài khoản Shopee và tài khoản ShopeeFood bắt buộc phải trùng khớp nhau." |
+| 4 | Số lượng mã giảm giá tối đa có thể lưu vào Kho Voucher trên ứng dụng Shopee là bao nhiêu? (`unfiltered`) | "Quy định lưu Voucher: Số lượng các mã giảm giá có thể lưu vào Kho Voucher trên Ứng dụng Shopee hoàn toàn không bị giới hạn." | 0.3898 | Có | "Số lượng mã giảm giá lưu vào Kho Voucher trên Shopee hoàn toàn không bị giới hạn." |
+| 5 | Người dùng có thể theo dõi trạng thái xử lý Trả hàng/Hoàn tiền qua những kênh nào ngoài mục Đơn Mua? (`filter: customer_role="both"`) | "Theo dõi tiến độ: Cập nhật qua Mục Thông báo trên app, Biểu ngữ điện thoại, Email liên kết và Trò Chuyện Với Shopee (Tép Thám Tử)..." | 0.1678 | Có | "Người dùng có thể theo dõi qua Mục Thông báo app, Email liên kết, Banner thông báo điện thoại và Chatbot Tép Thám Tử." |
 
 **Bao nhiêu câu hỏi trả về chunk có liên quan trong top-3?** **5 / 5**
 
 **Điều hay nhất tôi học được từ việc thực thi:**
-> Tiền lọc bằng siêu dữ liệu (`metadata_filter={"customer_role": "both"}` hoặc `{"category": "voucher-khuyen-mai"}`) giúp khoanh vùng tập dữ liệu truy xuất chính xác, loại bỏ hẳn nhiễu từ các văn bản không thuộc phạm vi trước khi tính toán vector similarity.
+> Chiến lược **`HeadingBasedChunker`** của cá nhân tôi đã bảo toàn trọn vẹn từng mục quy định/bước hướng dẫn vào duy nhất 1 chunk. Khi kết hợp với tiền lọc siêu dữ liệu (`metadata_filter={"customer_role": "both"}` hoặc `{"category": "voucher-khuyen-mai"}`), Retriever khoanh vùng dữ liệu cực kỳ chính xác và loại bỏ hẳn nhiễu trước khi tính toán điểm tương đồng vector.
+
 
 
 ---
