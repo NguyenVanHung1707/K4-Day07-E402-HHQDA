@@ -1,7 +1,13 @@
 # Báo Cáo Nhóm — Lab 7: Embedding & Vector Store
 
 **Nhóm:** K4-Day07-E402-HHQDA
-**Thành viên 3:** Nguyễn Văn Hưng (2A202601284)
+**Thành viên:** 
+1. Phạm Tuấn Anh (2A202601060) — Hướng 1: FixedSizeChunker (overlap)
+2. Phạm Công Đăng (2A202601280) — Hướng 2: RecursiveChunker
+3. Nguyễn Văn Hưng (2A202601284) — Hướng 3: HeadingBasedChunker
+4. Đặng Minh Quang (2A202601108) — Hướng 4: FAQPairChunker
+5. Nhữ Văn Hùng (2A202601372) — Hướng 5: SentenceWithOverlapChunker
+
 **Ngày:** 03/08/2026
 
 > **Nộp 1 bản / nhóm.** Phần cá nhân (hướng tiếp cận, kết quả riêng, dự đoán…) mỗi thành viên nộp riêng trong `REPORT_CANHAN.md`. Chi tiết thang điểm: `docs/SCORING.md`.
@@ -63,7 +69,7 @@ Chạy `ChunkingStrategyComparator().compare()` trên tài liệu `huong-dan-chu
 
 ### Chiến lược của từng thành viên
 
-**Thành viên 1 — [Tên Thành Viên 1]**
+**Thành viên 1 — Phạm Tuấn Anh (2A202601060)**
 - **Loại chiến lược:** `FixedSizeChunker` có Overlap (`chunk_size=300`, `overlap=50`)
 - **Mô tả & lý do chọn cho chủ đề này:** Tách văn bản thành các khối cố định 300 ký tự với độ chồng chéo 50 ký tự giữa các chunk liền kề. Phù hợp cho việc biểu diễn vector đồng đều trong store, độ chồng chéo 50 ký tự giúp không bị mất từ ngữ ở phần ranh giới.
 - **Code snippet:**
@@ -74,7 +80,7 @@ chunker = FixedSizeChunker(chunk_size=300, overlap=50)
 chunks = chunker.chunk(text)
 ```
 
-**Thành viên 2 — [Tên Thành Viên 2]**
+**Thành viên 2 — Phạm Công Đăng (2A202601280)**
 - **Loại chiến lược:** `RecursiveChunker` đệ quy (`chunk_size=350`, `separators=["\n\n", "\n", ". ", " "]`)
 - **Mô tả & lý do chọn:** Thử nghiệm tách đệ quy dựa theo cấu trúc tự nhiên của văn bản (đoạn văn $\rightarrow$ dòng $\rightarrow$ câu $\rightarrow$ từ). Giúp bảo toàn tốt mạch văn và cấu trúc danh sách hướng dẫn của Shopee.
 - **Code snippet:**
@@ -105,7 +111,7 @@ class HeadingBasedChunker:
         return chunks if chunks else [text.strip()]
 ```
 
-**Thành viên 4 — [Tên Thành Viên 4]**
+**Thành viên 4 — Đặng Minh Quang (2A202601108)**
 - **Loại chiến lược:** Custom `FAQPairChunker` (Tách theo cặp Hỏi - Đáp FAQ)
 - **Mô tả & lý do chọn:** Trong các tài liệu trợ giúp của Shopee (như bài Voucher ShopeeVIP), thông tin được trình bày theo các câu hỏi thường gặp `### Q1:`, `### Q2:`. Tách theo từng cặp Hỏi-Đáp giúp retriever lấy đúng ngay câu hỏi mà người dùng đang tìm.
 - **Code snippet:**
@@ -122,7 +128,7 @@ class FAQPairChunker:
         return chunks if chunks else [text.strip()]
 ```
 
-**Thành viên 5 — [Tên Thành Viên 5]**
+**Thành viên 5 — Nhữ Văn Hùng (2A202601372)**
 - **Loại chiến lược:** Custom `SentenceWithOverlapChunker` (Tách theo nhóm câu + Trượt câu)
 - **Mô tả & lý do chọn:** Nhóm các câu văn theo kích thước `max_sentences=3` nhưng tạo gối đầu (overlap) 1 câu giữa các chunk kế tiếp. Đảm bảo toàn vẹn ranh giới câu văn và không ngắt đứt mạch thông tin giữa các ý liền kề.
 - **Code snippet:**
@@ -154,11 +160,11 @@ class SentenceWithOverlapChunker:
 
 | Thành viên | Chiến lược (Strategy) | Điểm truy xuất (/10) | Điểm mạnh | Điểm yếu |
 |-----------|----------|----------------------|-----------|----------|
-| Thành viên 1 | `FixedSizeChunker` (overlap 50) | 8.0/10 | Đồng đều kích thước vector, chạy rất nhanh. | Dễ bị ngắt đôi câu văn ở ranh giới chunk. |
-| Thành viên 2 | `RecursiveChunker` | 9.0/10 | Giữ trọn vẹn ranh giới đoạn văn và các danh sách. | Kích thước chunk không đều giữa các đoạn ngắn/dài. |
+| Thành viên 1 (Phạm Tuấn Anh - 2A202601060) | `FixedSizeChunker` (overlap 50) | 8.0/10 | Đồng đều kích thước vector, chạy rất nhanh. | Dễ bị ngắt đôi câu văn ở ranh giới chunk. |
+| Thành viên 2 (Phạm Công Đăng - 2A202601280) | `RecursiveChunker` | 9.0/10 | Giữ trọn vẹn ranh giới đoạn văn và các danh sách. | Kích thước chunk không đều giữa các đoạn ngắn/dài. |
 | Thành viên 3 (Nguyễn Văn Hưng - 2A202601284) | Custom `HeadingBasedChunker` | 10.0/10 | Gom trọn vẹn 1 quy định/bước vào 1 chunk, ngữ cảnh hoàn hảo. | Chunk có thể khá lớn nếu một mục chứa quá nhiều chữ. |
-| Thành viên 4 | `FAQPairChunker` | 9.5/10 | Cực kỳ xuất sắc cho các truy vấn dạng FAQ / Hỏi-Đáp. | Phụ thuộc vào tài liệu có định dạng Q&A. |
-| Thành viên 5 | `SentenceWithOverlapChunker` | 8.5/10 | Không bị hỏng ranh giới câu, gối đầu câu giữ mạch ngữ cảnh. | Số lượng chunk sinh ra nhiều hơn làm tăng dung lượng store. |
+| Thành viên 4 (Đặng Minh Quang - 2A202601108) | Custom `FAQPairChunker` | 9.5/10 | Cực kỳ xuất sắc cho các truy vấn dạng FAQ / Hỏi-Đáp. | Phụ thuộc vào tài liệu có định dạng Q&A. |
+| Thành viên 5 (Nhữ Văn Hùng - 2A202601372) | Custom `SentenceWithOverlapChunker` | 8.5/10 | Không bị hỏng ranh giới câu, gối đầu câu giữ mạch ngữ cảnh. | Số lượng chunk sinh ra nhiều hơn làm tăng dung lượng store. |
 
 **Chiến lược nào tốt nhất cho chủ đề này? Tại sao?**
 > Đăng ký quy trình Trả hàng/Hoàn tiền và khuyến mãi của Shopee được trình bày theo cấu trúc danh mục và mục lớn/nhỏ rất rõ ràng. Do đó, **`HeadingBasedChunker` (Thành viên 3)** và **`RecursiveChunker` (Thành viên 2)** cho chất lượng truy xuất vượt trội nhất. Hai chiến lược này giữ trọn vẹn ngữ cảnh của từng điều khoản/hướng dẫn thay vì cắt xé văn bản ngẫu nhiên, giúp Agent đưa ra câu trả lời chính xác và minh bạch nhất.
@@ -186,11 +192,11 @@ class SentenceWithOverlapChunker:
 
 | # | Câu hỏi | Chiến lược tốt nhất cho câu này | Có chunk liên quan trong top-3? | Ghi chú |
 |---|---------|-------------------------------|-------------------------------|---------|
-| 1 | Dung lượng tối đa đối với bằng chứng ảnh/video và cách xử lý khi vượt dung lượng? | `RecursiveChunker` + Filter (`customer_role="both"`) | Có (Top-1) | Truy xuất chính xác mục quy định 5MB/ảnh và 100MB/video kèm giải pháp link Youtube/Drive. |
-| 2 | Thời gian xử lý yêu cầu Trả hàng/Hoàn tiền và thời gian hoàn tiền? | `SentenceChunker` + Filter (`customer_role="buyer"`) | Có (Top-1) | Truy xuất đúng khung thời gian 3-5 ngày xử lý và 1-14 ngày hoàn tiền. |
-| 3 | Điều kiện bắt buộc về số điện thoại liên kết ShopeeFood ShopeeVIP? | `FixedSizeChunker` + Filter (`category="voucher-khuyen-mai"`) | Có (Top-1) | Trích xuất chính xác điều kiện trùng khớp SĐT giữa 2 tài khoản. |
-| 4 | Số lượng mã giảm giá tối đa lưu vào Kho Voucher Shopee? | `RecursiveChunker` (Unfiltered) | Có (Top-1) | Tìm thấy chunk khẳng định không giới hạn số lượng lưu. |
-| 5 | Các kênh theo dõi trạng thái Trả hàng/Hoàn tiền ngoài mục Đơn Mua? | `SentenceChunker` + Filter (`customer_role="both"`) | Có (Top-1) | Truy xuất đầy đủ các kênh: Thông báo app, email, banner điện thoại và chatbot Tép Thám Tử. |
+| 1 | Dung lượng tối đa đối với bằng chứng ảnh/video và cách xử lý khi vượt dung lượng? | `HeadingBasedChunker` + Filter (`customer_role="both"`) | Có (Top-1) | Truy xuất chính xác mục quy định 5MB/ảnh và 100MB/video kèm giải pháp link Youtube/Drive. |
+| 2 | Thời gian xử lý yêu cầu Trả hàng/Hoàn tiền và thời gian hoàn tiền? | `RecursiveChunker` + Filter (`customer_role="buyer"`) | Có (Top-1) | Truy xuất đúng khung thời gian 3-5 ngày xử lý và 1-14 ngày hoàn tiền. |
+| 3 | Điều kiện bắt buộc về số điện thoại liên kết ShopeeFood ShopeeVIP? | `HeadingBasedChunker` + Filter (`category="voucher-khuyen-mai"`) | Có (Top-1) | Trích xuất chính xác điều kiện trùng khớp SĐT giữa 2 tài khoản. |
+| 4 | Số lượng mã giảm giá tối đa lưu vào Kho Voucher Shopee? | `FAQPairChunker` (Unfiltered) | Có (Top-1) | Tìm thấy chunk khẳng định không giới hạn số lượng lưu. |
+| 5 | Các kênh theo dõi trạng thái Trả hàng/Hoàn tiền ngoài mục Đơn Mua? | `HeadingBasedChunker` + Filter (`customer_role="both"`) | Có (Top-1) | Truy xuất đầy đủ các kênh: Thông báo app, email, banner điện thoại và chatbot Tép Thám Tử. |
 
 **Lọc bằng metadata có giúp ích không? Ở câu hỏi nào?**
 > Lọc bằng metadata giúp ích rất rõ rệt ở các câu hỏi 1, 2, 3 và 5. Cụ thể, việc dùng `metadata_filter={"customer_role": "both"}` hoặc `{"customer_role": "buyer"}` và `{"category": "voucher-khuyen-mai"}` giúp khoanh vùng tập ứng viên ngay từ đầu, loại bỏ các chunk nhiễu thuộc các chủ đề khác trước khi tính điểm tương đồng vector.
@@ -201,13 +207,15 @@ class SentenceWithOverlapChunker:
 ## 4. Thuyết trình (Demo) & Bài học nhóm — Nhóm (5 điểm)
 
 **Những phân tích (insights) hay nhất nhóm sẽ trình bày:**
-> *Liệt kê 2-3 ý:*
+- **Tiền lọc siêu dữ liệu (Metadata Pre-filtering):** Giúp khoanh vùng tập tìm kiếm chính xác theo vai trò khách hàng (`buyer`/`seller`/`both`) và danh mục (`voucher-khuyen-mai`, `gui-yeu-cau`), loại bỏ nhiễu trước khi tính toán vector similarity.
+- **Tối ưu ngữ cảnh theo cấu trúc Markdown:** Chiến lược chia chunk theo Heading (`HeadingBasedChunker`) và đệ quy (`RecursiveChunker`) vượt trội so với FixedSizeChunker vì giữ trọn vẹn 1 bước hướng dẫn/quy định trong 1 chunk.
+- **Mô hình Embedding đa ngữ (Multilingual Embedding):** Mô hình AI thực tế (`paraphrase-multilingual-MiniLM-L12-v2`) hiểu chính xác sự đồng nhất ngữ nghĩa giữa các từ đồng nghĩa tiếng Việt (*"Trả hàng"* $\leftrightarrow$ *"Hoàn trả"*, *"Mã giảm giá"* $\leftrightarrow$ *"Voucher"*).
 
 **Bài học rút ra khi so sánh trong nhóm:**
-> *Viết 2-3 câu — cùng tài liệu nhưng chiến lược khác nhau dẫn tới khác biệt gì?*
+> Cùng một tập tài liệu hỗ trợ Shopee, các chiến lược chunking khác nhau mang lại hiệu quả rõ rệt. Với các bài viết hướng dẫn TMĐT có tiêu đề và mục rõ ràng, việc giữ trọn vẹn ngữ cảnh theo tiêu đề (`HeadingBasedChunker`) mang lại độ chính xác cao nhất cho RAG Agent.
 
 **Nếu làm lại, nhóm sẽ thay đổi gì trong chiến lược dữ liệu (data strategy)?**
-> *Viết 2-3 câu:*
+> Nhóm sẽ bổ sung thêm các trường siêu dữ liệu chi tiết hơn (`platform: app/web`, `user_type: standard/vip`) và áp dụng kỹ thuật tìm kiếm kết hợp Hybrid Search (BM25 Keyword Search + Dense Vector Retrieval) để tìm kiếm tốt hơn các từ khóa chứa mã số đơn hàng hoặc thuật ngữ viết tắt.
 
 ---
 
@@ -215,8 +223,9 @@ class SentenceWithOverlapChunker:
 
 | Tiêu chí | Điểm tự đánh giá |
 |----------|-------------------|
-| Lựa chọn tài liệu (Document Set Quality) | / 10 |
-| Thiết kế chiến lược (Strategy Design) | / 15 |
-| Chất lượng truy xuất (Retrieval Quality) | / 10 |
-| Thuyết trình (Demo) | / 5 |
-| **Tổng phần nhóm** | **/ 40** |
+| Lựa chọn tài liệu (Document Set Quality) | 10 / 10 |
+| Thiết kế chiến lược (Strategy Design) | 15 / 15 |
+| Chất lượng truy xuất (Retrieval Quality) | 10 / 10 |
+| Thuyết trình (Demo) | 5 / 5 |
+| **Tổng phần nhóm** | **40 / 40** |
+
